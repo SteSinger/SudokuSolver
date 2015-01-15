@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sudoku-Solver</title>
+    <style>
+        input{
+            width: 20px;
+            height: 20px;
+            text-align: center;
+        }
+    </style>
+    <script src="jquery-2.1.3.min.js"></script>
+    <script src="solver.js"></script>
+</head>
+<body>
+    <h1>Sudoku Solver</h1>
+    <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
+    <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
+    <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
+    <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
+    <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
+    <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
+    <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
+    <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
+    <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
+    <button onclick="solve()">Loesen</button>
+
+    <div>
+        <button onclick="first()">|<</button>
+        <button onclick="prev()"><</button>
+        <span id="curr">0</span>/<span id="total">0</span>
+        <button onclick="next()">></button>
+        <button onclick="last()">>|</button>
+    </div>
+
+</body>
+</html>
