@@ -7,7 +7,56 @@
             width: 20px;
             height: 20px;
             text-align: center;
+
+            border-style: solid;
+            border-color: lightgray;
+            border-right-style: solid;
+            border-bottom-style: solid;
+            border-left-style: none;
+            border-top-style: none;
         }
+
+        input:nth-child(3n) {
+            border-right-style: solid;
+            border-right-color: black;
+        }
+
+        div:nth-child(3n+1) input {
+            border-bottom-style: solid;
+            border-bottom-color: black;
+        }
+
+        div:nth-child(2) input{
+            border-top-style: solid;
+            border-top-color: black;
+        }
+
+        input:first-child{
+            border-left-style: solid;
+            border-left-color: black;
+        }
+
+        table {
+            border:2px solid black;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        td {
+            width:60px;
+            height:60px;
+            border:1px dotted black;
+        }
+
+        tr:nth-child(3n) td {
+            border-bottom-width:2px;
+            border-bottom-style: solid;
+        }
+        td:nth-child(3n) {
+            border-right-width:2px;
+            border-right-style: solid;
+        }
+
     </style>
     <script src="jquery-2.1.3.min.js"></script>
     <script src="solver.js"></script>
@@ -23,15 +72,14 @@
     <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
     <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
     <div><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/><input type="text"/></div>
-    <button onclick="solve()">Loesen</button>
+    <button onclick="solve()">Loesen</button><button onclick="reset()">Reset</button>
 
     <div>
-        <button onclick="first()">|<</button>
-        <button onclick="prev()"><</button>
+        <button onclick="displayFirstStep()">|<</button>
+        <button onclick="displayPreviousStep()"><</button>
         <span id="curr">0</span>/<span id="total">0</span>
-        <button onclick="next()">></button>
-        <button onclick="last()">>|</button>
+        <button onclick="displayNextStep()">></button>
+        <button onclick="displayLastStep()">>|</button>
     </div>
-
 </body>
 </html>
