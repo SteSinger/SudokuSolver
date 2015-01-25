@@ -281,15 +281,129 @@ function isInCell(element, cell, arr) {
 
 // called from html
 
-function solve() {
+function reducePossibleEntries() {
+    var changed = false,
+        i,
+        j,
+        length,
+        step = steps.length - 1;
+
+    for (i = 0; i < 9; i += 1) {
+        for (j = 0; j < 9; j += 1) {
+            length = steps[step][i][j].length;
+            if (length > 1) {
+                steps[step][i][j] = steps[step][i][j].filter(
+                    function (element) {
+                        var inRow = isInRow(element, i, steps[step]),
+                            inCol = isInColumn(element, j, steps[step]),
+                            inCell = isInCell(element, getCell(i, j), steps[step]);
+                        return !inRow && !inCol && !inCell;
+                    }
+                );
+                if (length !== steps[step][i][j].length) {
+                    changed = true;
+                }
+                if (steps[step][i][j].length === 1) {
+                    copyArray = steps[step];
+                    step += 1;
+                    steps[step] = JSON.parse(JSON.stringify(copyArray));
+                }
+            }
+        }
+    }
+    return changed;
+}
+function onlyPossibleEntry() {
     "use strict";
     var nums,
         copyArray,
-        length,
         i,
         j,
-        changed = true,
-        step = 0;
+        changed = false,
+        step = steps.length - 1;
+
+    for (i = 0; i < 9; i += 1) {
+        for (j = 0; j < 9; j += 1) {
+            if (steps[step][i][j].length !== 1) {
+                nums = countFree(i, j, steps[step]);
+
+                nums.forEach(function (value, index, array) {
+                    var innerCount = 0,
+                        innerValues = [];
+                    value.forEach(function (val, ind) {
+
+                        if (val === 1) {
+                            if (steps[step][i][j].indexOf(ind) !== -1) {
+                                innerCount += 1;
+                                innerValues.push(ind);
+                            }
+                        }
+                    });
+                    if (innerCount === 1) {
+                        changed = true;
+                        steps[step][i][j] = innerValues;
+                        copyArray = steps[step];
+                        step += 1;
+                        steps[step] = JSON.parse(JSON.stringify(copyArray));
+                    }
+                });
+            }
+            if (changed) {
+                break;
+            }
+        }
+        if (changed) {
+            break;
+        }
+    }
+    return changed;
+}
+
+function unionInRow(row, setSize, arr) {
+
+    var i,
+        j,
+        length,
+        positionLength;
+
+    for (i = 0; i < 9; i += 1) {
+        length = arr[row][i].length;
+        if (length <= setSize) {
+            for (j = 0; j < 9; j += 1) {
+                if (i !== j) {
+                    positionLength = arr[row][j].length;
+                    if (positionLength <= setSize) {
+
+
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+function reduceByUnion() {
+    "use strict";
+
+    var i,
+        j,
+        step = steps.length - 1;
+
+    for (i = 0; i < 9; i += 1) {
+        for (j = 2; j < 9; j += 1)
+        unionInRow(i, j, steps[step]);
+        unionInColumn(i, j, steps[step]);
+        unionInCell(i, j, steps[step]);
+    }
+
+}
+
+function solve() {
+    "use strict";
+    var i,
+        j,
+        changed = true;
     steps = [];
     parseInput();
 
@@ -303,67 +417,12 @@ function solve() {
     }
 
     while (changed) {
-        changed = false;
-
-        for (i = 0; i < 9; i += 1) {
-            for (j = 0; j < 9; j += 1) {
-                length = steps[step][i][j].length;
-                if (length > 1) {
-                    steps[step][i][j] = steps[step][i][j].filter(
-                        function (element) {
-                            var inRow = isInRow(element, i, steps[step]),
-                                inCol = isInColumn(element, j, steps[step]),
-                                inCell = isInCell(element, getCell(i, j), steps[step]);
-                            return !inRow  && !inCol && !inCell;
-                        }
-                    );
-                    if (length !== steps[step][i][j].length) {
-                        changed = true;
-                    }
-                    if (steps[step][i][j].length === 1) {
-                        copyArray = steps[step];
-                        step += 1;
-                        steps[step] = JSON.parse(JSON.stringify(copyArray));
-                    }
-                }
-            }
-        }
-
+        changed = reducePossibleEntries();
         if (changed === false) {
-            for (i = 0; i < 9; i += 1) {
-                for (j = 0; j < 9; j += 1) {
-                    if (steps[step][i][j].length !== 1) {
-                        nums = countFree(i, j, steps[step]);
-
-                        nums.forEach(function (value, index, array) {
-                            var innerCount = 0,
-                                innerValues = [];
-                            value.forEach(function (val, ind) {
-
-                                if (val === 1) {
-                                    if (steps[step][i][j].indexOf(ind) !== -1) {
-                                        innerCount += 1;
-                                        innerValues.push(ind);
-                                    }
-                                }
-                            });
-                            if (innerCount === 1) {
-                                changed = true;
-                                steps[step][i][j] = innerValues;
-                                copyArray = steps[step];
-                                step += 1;
-                                steps[step] = JSON.parse(JSON.stringify(copyArray));
-                            }
-                        });
-                    }
-                    if (changed) {
-                        break;
-                    }
-                }
-                if (changed) {
-                    break;
-                }
-            }
+            changed = onlyPossibleEntry();
+        }
+        if (changed === false) {
+            changed = reduceByUnion();
         }
     }
     deleteTableAndCreateNew();
