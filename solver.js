@@ -39,13 +39,13 @@ function countFree(row, col, arr) {
         }
     }
     for (i = 0; i < 9; i += 1) {
-        arr[row][i].forEach(function (currentValue, index, array) {
-            if (array.length > 1) {
+        arr[row][i].forEach(function (currentValue, index, valueSet) {
+            if (valueSet.size > 1) {
                 values[0][currentValue] += 1;
             }
         });
-        arr[i][col].forEach(function (currentValue, index, array) {
-            if (array.length > 1) {
+        arr[i][col].forEach(function (currentValue, index, valueSet) {
+            if (valueSet.size > 1) {
                 values[1][currentValue] += 1;
             }
         });
@@ -55,8 +55,8 @@ function countFree(row, col, arr) {
             cell = getCell(row, col);
             offsetRow = 3 * Math.floor(cell / 3);
             offsetCol = 3 * (cell % 3);
-            arr[i + offsetRow][j + offsetCol].forEach(function (currentValue, index, array) {
-                if (array.length > 1) {
+            arr[i + offsetRow][j + offsetCol].forEach(function (currentValue, index, valueSet) {
+                if (valueSet.size > 1) {
                     values[2][currentValue] += 1;
                 }
             });
@@ -67,72 +67,63 @@ function countFree(row, col, arr) {
 // Validations
 function validateRow(row) {
     "use strict";
-    var fieldVal, values = new Array(10), i;
-    for (i = 0; i < values.length; i += 1) {
-        values[i] = false;
-    }
+    var fieldVal, values = new Set(), i;
     for (i = 0; i < 9; i += 1) {
         fieldVal = steps[0][row][i];
-        if (fieldVal.length === 1) {
-            if (values[fieldVal[0]] === false) {
-                values[fieldVal[0]] = true;
-            }
-            else {
-                alert("Die " + fieldVal[0] + " ist doppelt Eingetragen in Zeile " + (row + 1));
-            }
+        if (fieldVal.size === 1) {
+            fieldVal.forEach(function (value) {
+                if (values.has(value)) {
+                    alert("Die " + value + " ist doppelt Eingetragen in Zeile " + (row + 1));
+                }
+                values.add(value);
+            });
         }
     }
 }
 function validateColumn(col) {
     "use strict";
-    var values = new Array(10), i, fieldVal;
-    for (i = 0; i < values.length; i += 1) {
-        values[i] = false;
-    }
+    var fieldVal, values = new Set(), i;
     for (i = 0; i < 9; i += 1) {
         fieldVal = steps[0][i][col];
-        if (fieldVal.length === 1) {
-            if (values[fieldVal[0]] === false) {
-                values[fieldVal[0]] = true;
-            }
-            else {
-                alert("Die " + fieldVal[0] + " ist doppelt Eingetragen in Spalte " + (col + 1));
-            }
+        if (fieldVal.size === 1) {
+            fieldVal.forEach(function (value) {
+                if (values.has(value)) {
+                    alert("Die " + value + " ist doppelt Eingetragen in Spalte " + (col + 1));
+                }
+                values.add(value);
+            });
         }
     }
 }
 function validateCell(cell) {
     "use strict";
-    var values = new Array(10), i, j, offsetRow, offsetCol, fieldVal;
-    for (i = 0; i < values.length; i += 1) {
-        values[i] = false;
-    }
+    var values = new Set(), i, j, offsetRow, offsetCol, fieldVal;
     for (i = 0; i < 3; i += 1) {
         for (j = 0; j < 3; j += 1) {
             offsetRow = 3 * Math.floor(cell / 3);
             offsetCol = 3 * (cell % 3);
             fieldVal = steps[0][i + offsetRow][j + offsetCol];
-            if (fieldVal.length === 1) {
-                if (values[fieldVal[0]] === false) {
-                    values[fieldVal[0]] = true;
-                }
-                else {
-                    alert("Die " + fieldVal[0] + " ist doppelt Eingetragen in Zelle " + (cell + 1));
-                }
+            if (fieldVal.size === 1) {
+                fieldVal.forEach(function (value) {
+                    if (values.has(value)) {
+                        alert("Die " + value + " ist doppelt Eingetragen in Zelle " + (cell + 1));
+                    }
+                    values.add(value);
+                });
             }
         }
     }
 }
 function valuesInCell(cell, arr) {
     "use strict";
-    var values = new Array(9), i, j, offsetRow, offsetCol, fieldVal;
+    var values = new Set(), i, j, offsetRow = 3 * Math.floor(cell / 3), offsetCol = 3 * (cell % 3), fieldVal;
     for (i = 0; i < 3; i += 1) {
         for (j = 0; j < 3; j += 1) {
-            offsetRow = 3 * Math.floor(cell / 3);
-            offsetCol = 3 * (cell % 3);
             fieldVal = arr[i + offsetRow][j + offsetCol];
-            if (fieldVal.length === 1) {
-                values[fieldVal[0]] = fieldVal[0];
+            if (fieldVal.size === 1) {
+                fieldVal.forEach(function (value) {
+                    values.add(value);
+                });
             }
         }
     }
@@ -140,38 +131,43 @@ function valuesInCell(cell, arr) {
 }
 function valuesInRow(row, arr) {
     "use strict";
-    var values = new Array(9), i, fieldVal;
+    var values = new Set(), i, fieldVal;
     for (i = 0; i < 9; i += 1) {
         fieldVal = arr[row][i];
-        if (fieldVal.length === 1) {
-            values[fieldVal[0]] = fieldVal[0];
+        if (fieldVal.size === 1) {
+            fieldVal.forEach(function (value) {
+                values.add(value);
+            });
         }
     }
     return values;
 }
 function valuesInCol(col, arr) {
     "use strict";
-    var values = new Array(9), i, fieldVal;
+    var values = new Set(), i, fieldVal;
     for (i = 0; i < 9; i += 1) {
         fieldVal = arr[i][col];
-        if (fieldVal.length === 1) {
-            values[fieldVal[0]] = fieldVal[0];
+        if (fieldVal.size === 1) {
+            fieldVal.forEach(function (value) {
+                values.add(value);
+            });
         }
     }
     return values;
 }
-function parseLine(arr) {
+function parseLine(numberSet) {
     "use strict";
-    var result = "", i;
-    for (i = 0; i < arr.length; i += 1) {
-        result += arr[i];
-        if (i % 3 === 2 && i > 0) {
+    var result = "", index = 0;
+    numberSet.forEach(function (value) {
+        result += value.toString(10);
+        if (index % 3 === 2 && index > 0) {
             result += "<br/>";
         }
-        else if (i < arr.length - 1) {
+        else if (index < numberSet.size - 1) {
             result += ",";
         }
-    }
+        index += 1;
+    });
     return result;
 }
 function parseInput() {
@@ -182,12 +178,13 @@ function parseInput() {
             line = [];
             input.push(line);
         }
-        var entry = $(this).val();
+        var entry = $(this).val(), valueSet = new Set();
         if (entry !== "") {
-            line.push([parseInt(entry, 10)]);
+            valueSet.add(parseInt(entry, 10));
+            line.push(valueSet);
         }
         else {
-            line.push([]);
+            line.push(new Set());
         }
     });
     steps[0] = input;
@@ -199,34 +196,52 @@ function parseInput() {
 }
 function isInRow(element, row, arr) {
     "use strict";
-    return valuesInRow(row, arr).indexOf(element) !== -1;
+    return valuesInRow(row, arr).has(element);
 }
 function isInColumn(element, column, arr) {
     "use strict";
-    return valuesInCol(column, arr).indexOf(element) !== -1;
+    return valuesInCol(column, arr).has(element);
 }
 function isInCell(element, cell, arr) {
     "use strict";
-    return valuesInCell(cell, arr).indexOf(element) !== -1;
+    return valuesInCell(cell, arr).has(element);
 }
-// called from html
+function cloneArray(arr) {
+    var i, j, returnArray = new Array(9);
+    for (i = 0; i < 9; i += 1) {
+        returnArray[i] = new Array(9);
+        for (j = 0; j < 9; j += 1) {
+            returnArray[i][j] = new Set();
+            arr[i][j].forEach(function (value) {
+                returnArray[i][j].add(value);
+            });
+        }
+    }
+    return returnArray;
+}
 function reducePossibleEntries() {
-    var changed = false, i, j, length, step = steps.length - 1, copyArray;
+    var changed = false, i, j, length, step = steps.length - 1, tempSet = new Set();
     for (i = 0; i < 9; i += 1) {
         for (j = 0; j < 9; j += 1) {
-            length = steps[step][i][j].length;
+            length = steps[step][i][j].size;
+            tempSet.clear();
             if (length > 1) {
-                steps[step][i][j] = steps[step][i][j].filter(function (element) {
+                steps[step][i][j].forEach(function (element) {
                     var inRow = isInRow(element, i, steps[step]), inCol = isInColumn(element, j, steps[step]), inCell = isInCell(element, getCell(i, j), steps[step]);
-                    return !inRow && !inCol && !inCell;
+                    if (inRow || inCol || inCell) {
+                        tempSet.add(element);
+                    }
                 });
-                if (length !== steps[step][i][j].length) {
+                tempSet.forEach(function (element) {
+                    steps[step][i][j].delete(element);
+                });
+                if (length !== steps[step][i][j].size) {
                     changed = true;
                 }
-                if (steps[step][i][j].length === 1) {
-                    copyArray = steps[step];
+                if (steps[step][i][j].size === 1) {
+                    steps[step + 1] = steps[step];
+                    steps[step] = cloneArray(steps[step]);
                     step += 1;
-                    steps[step] = JSON.parse(JSON.stringify(copyArray));
                 }
             }
         }
@@ -235,27 +250,27 @@ function reducePossibleEntries() {
 }
 function onlyPossibleEntry() {
     "use strict";
-    var nums, copyArray, i, j, changed = false, step = steps.length - 1;
+    var nums, i, j, changed = false, step = steps.length - 1;
     for (i = 0; i < 9; i += 1) {
         for (j = 0; j < 9; j += 1) {
             if (steps[step][i][j].length !== 1) {
                 nums = countFree(i, j, steps[step]);
-                nums.forEach(function (value, index, array) {
-                    var innerCount = 0, innerValues = [];
-                    value.forEach(function (val, ind) {
-                        if (val === 1) {
-                            if (steps[step][i][j].indexOf(ind) !== -1) {
+                nums.forEach(function (value) {
+                    var innerCount = 0, innerValues = new Set();
+                    value.forEach(function (val) {
+                        if (value.size === 1) {
+                            if (steps[step][i][j].has(val)) {
                                 innerCount += 1;
-                                innerValues.push(ind);
+                                innerValues.add(val);
                             }
                         }
                     });
                     if (innerCount === 1) {
                         changed = true;
                         steps[step][i][j] = innerValues;
-                        copyArray = steps[step];
+                        steps[step + 1] = steps[step];
+                        steps[step] = cloneArray(steps[step]);
                         step += 1;
-                        steps[step] = JSON.parse(JSON.stringify(copyArray));
                     }
                 });
             }
@@ -272,11 +287,11 @@ function onlyPossibleEntry() {
 function unionInRow(row, setSize, arr) {
     var i, j, length, positionLength;
     for (i = 0; i < 9; i += 1) {
-        length = arr[row][i].length;
+        length = arr[row][i].size;
         if (length <= setSize) {
             for (j = 0; j < 9; j += 1) {
                 if (i !== j) {
-                    positionLength = arr[row][j].length;
+                    positionLength = arr[row][j].size;
                     if (positionLength <= setSize) {
                     }
                 }
@@ -294,13 +309,17 @@ function reduceByUnion() {
 }
 function solve() {
     "use strict";
-    var i, j, changed = true;
+    var i, j, k, changed = true;
     steps = [];
     parseInput();
     for (i = 0; i < 9; i += 1) {
         for (j = 0; j < 9; j += 1) {
-            if (steps[0][i][j].length === 0) {
-                steps[0][i][j] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            if (steps[0][i][j].size === 0) {
+                var values = new Set();
+                for (k = 1; k <= 9; k += 1) {
+                    values.add(k);
+                }
+                steps[0][i][j] = values;
             }
         }
     }
