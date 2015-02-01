@@ -5,6 +5,7 @@
  * Created by Stephael on 11.01.2015.
  */
 var steps = [];
+var solvedWith = [];
 var currStep = 0;
 function tableCreate(arr) {
     "use strict";
@@ -20,8 +21,10 @@ function tableCreate(arr) {
 }
 function deleteTableAndCreateNew() {
     "use strict";
+    currStep = Math.min(Math.max(currStep, 0), steps.length - 1);
     $("#curr").text(currStep + 1);
     $("#total").text(steps.length);
+    $("#method").text(solvedWith[currStep].toString(10));
     $("table").remove();
     tableCreate(steps[currStep]);
 }
@@ -188,6 +191,7 @@ function parseInput() {
         }
     });
     steps[0] = input;
+    solvedWith[0] = "Input";
     for (i = 0; i < 9; i += 1) {
         validateRow(i);
         validateColumn(i);
@@ -207,6 +211,7 @@ function isInCell(element, cell, arr) {
     return valuesInCell(cell, arr).has(element);
 }
 function cloneArray(arr) {
+    "use strict";
     var i, j, returnArray = new Array(9);
     for (i = 0; i < 9; i += 1) {
         returnArray[i] = new Array(9);
@@ -220,6 +225,7 @@ function cloneArray(arr) {
     return returnArray;
 }
 function reducePossibleEntries() {
+    "use strict";
     var changed = false, i, j, length, step = steps.length - 1, tempSet = new Set();
     for (i = 0; i < 9; i += 1) {
         for (j = 0; j < 9; j += 1) {
@@ -241,6 +247,7 @@ function reducePossibleEntries() {
                 if (steps[step][i][j].size === 1) {
                     steps[step + 1] = steps[step];
                     steps[step] = cloneArray(steps[step]);
+                    solvedWith[step] = "Entry reduction";
                     step += 1;
                 }
             }
@@ -270,6 +277,7 @@ function onlyPossibleEntry() {
                         steps[step][i][j] = innerValues;
                         steps[step + 1] = steps[step];
                         steps[step] = cloneArray(steps[step]);
+                        solvedWith[step] = "Choose only possible spot";
                         step += 1;
                     }
                 });
@@ -284,33 +292,198 @@ function onlyPossibleEntry() {
     }
     return changed;
 }
+function unionOfSets(set1, set2) {
+    "use strict";
+    var result = new Set();
+    set1.forEach(function (value) {
+        result.add(value);
+    });
+    set2.forEach(function (value) {
+        result.add(value);
+    });
+    return result;
+}
+function isSubSet(testSet, base) {
+    "use strict";
+    var subset = true;
+    testSet.forEach(function (value) {
+        if (!base.has(value)) {
+            subset = false;
+            return;
+        }
+    });
+    return subset;
+}
 function unionInRow(row, setSize, arr) {
-    var i, j, length, positionLength;
+    "use strict";
+    var i, j, k, baseSet, currentSet, matches = [], changed = false, step = steps.length - 1;
     for (i = 0; i < 9; i += 1) {
-        length = arr[row][i].size;
-        if (length <= setSize) {
+        baseSet = arr[row][i];
+        matches = [];
+        if (baseSet.size > 1 && baseSet.size <= setSize) {
             for (j = 0; j < 9; j += 1) {
                 if (i !== j) {
-                    positionLength = arr[row][j].size;
-                    if (positionLength <= setSize) {
+                    currentSet = arr[row][j];
+                    if (currentSet.size > 1 && currentSet.size <= setSize) {
+                        var matchSize = matches.length, union;
+                        for (k = 0; k < matchSize; k += 1) {
+                            union = { storedSet: null, setCount: matches[k].setCount + 1 };
+                            union.storedSet = unionOfSets(matches[k].storedSet, currentSet);
+                            if (union.storedSet.size <= setSize) {
+                                matches.push(union);
+                            }
+                        }
+                        union = { storedSet: null, setCount: 2 };
+                        union.storedSet = unionOfSets(baseSet, currentSet);
+                        if (union.storedSet.size <= setSize) {
+                            matches.push(union);
+                        }
                     }
                 }
             }
         }
+        matches.forEach(function (valueSet) {
+            for (k = 0; k < 9; k += 1) {
+                if (valueSet.storedSet.size === valueSet.setCount && !isSubSet(arr[row][k], valueSet.storedSet)) {
+                    valueSet.storedSet.forEach(function (value) {
+                        changed = arr[row][k].delete(value) || changed;
+                    });
+                }
+            }
+        });
+        if (changed) {
+            steps[step + 1] = steps[step];
+            steps[step] = cloneArray(steps[step]);
+            solvedWith[step] = "Union in row";
+            step += 1;
+            break;
+        }
     }
+    return changed;
+}
+function unionInColumn(column, setSize, arr) {
+    "use strict";
+    var i, j, k, baseSet, currentSet, matches = [], changed = false, step = steps.length - 1;
+    for (i = 0; i < 9; i += 1) {
+        baseSet = arr[i][column];
+        matches = [];
+        if (baseSet.size > 1 && baseSet.size <= setSize) {
+            for (j = 0; j < 9; j += 1) {
+                if (i !== j) {
+                    currentSet = arr[j][column];
+                    if (currentSet.size > 1 && currentSet.size <= setSize) {
+                        var matchSize = matches.length, union;
+                        for (k = 0; k < matchSize; k += 1) {
+                            union = { storedSet: null, setCount: matches[k].setCount + 1 };
+                            union.storedSet = unionOfSets(matches[k].storedSet, currentSet);
+                            if (union.storedSet.size <= setSize) {
+                                matches.push(union);
+                            }
+                        }
+                        union = { storedSet: null, setCount: 2 };
+                        union.storedSet = unionOfSets(baseSet, currentSet);
+                        if (union.storedSet.size <= setSize) {
+                            matches.push(union);
+                        }
+                    }
+                }
+            }
+        }
+        matches.forEach(function (valueSet) {
+            for (k = 0; k < 9; k += 1) {
+                if (valueSet.storedSet.size === valueSet.setCount && !isSubSet(arr[k][column], valueSet.storedSet)) {
+                    valueSet.storedSet.forEach(function (value) {
+                        changed = arr[k][column].delete(value) || changed;
+                    });
+                }
+            }
+        });
+        if (changed) {
+            steps[step + 1] = steps[step];
+            steps[step] = cloneArray(steps[step]);
+            solvedWith[step] = "Union in column";
+            step += 1;
+            break;
+        }
+    }
+    return changed;
+}
+function unionInCell(cell, setSize, arr) {
+    "use strict";
+    var i, j, k, l, column, baseSet, currentSet, matches = [], changed = false, step = steps.length - 1, offsetRow = 3 * Math.floor(cell / 3), offsetCol = 3 * (cell % 3);
+    for (column = 0; column < 3; column += 1) {
+        for (i = 0; i < 3; i += 1) {
+            baseSet = arr[i + offsetRow][column + offsetCol];
+            matches = [];
+            if (baseSet.size > 1 && baseSet.size <= setSize) {
+                for (j = 0; j < 3; j += 1) {
+                    if (i !== j) {
+                        currentSet = arr[j + offsetRow][column + offsetCol];
+                        if (currentSet.size > 1 && currentSet.size <= setSize) {
+                            var matchSize = matches.length, union;
+                            for (k = 0; k < matchSize; k += 1) {
+                                union = { storedSet: null, setCount: matches[k].setCount + 1 };
+                                union.storedSet = unionOfSets(matches[k].storedSet, currentSet);
+                                if (union.storedSet.size <= setSize) {
+                                    matches.push(union);
+                                }
+                            }
+                            union = { storedSet: null, setCount: 2 };
+                            union.storedSet = unionOfSets(baseSet, currentSet);
+                            if (union.storedSet.size <= setSize) {
+                                matches.push(union);
+                            }
+                        }
+                    }
+                }
+            }
+            matches.forEach(function (valueSet) {
+                for (k = 0; k < 3; k += 1) {
+                    for (l = 0; l < 3; l += 1)
+                        if (valueSet.storedSet.size === valueSet.setCount && !isSubSet(arr[k + offsetRow][l + offsetCol], valueSet.storedSet)) {
+                            valueSet.storedSet.forEach(function (value) {
+                                changed = arr[k + offsetRow][l + offsetCol].delete(value) || changed;
+                            });
+                        }
+                }
+            });
+            if (changed) {
+                steps[step + 1] = steps[step];
+                steps[step] = cloneArray(steps[step]);
+                solvedWith[step] = "Union in cell";
+                step += 1;
+                break;
+            }
+        }
+    }
+    return changed;
 }
 function reduceByUnion() {
     "use strict";
-    var i, j, step = steps.length - 1;
+    var i, j, step, changed = false;
     for (i = 0; i < 9; i += 1) {
-        for (j = 2; j < 9; j += 1)
-            unionInRow(i, j, steps[step]);
+        for (j = 2; j < 9; j += 1) {
+            step = steps.length - 1, changed = unionInRow(i, j, steps[step]);
+            if (changed) {
+                return changed;
+            }
+            changed = unionInColumn(i, j, steps[step]);
+            if (changed) {
+                return changed;
+            }
+            changed = unionInCell(i, j, steps[step]);
+            if (changed) {
+                return changed;
+            }
+        }
     }
+    return changed;
 }
 function solve() {
     "use strict";
     var i, j, k, changed = true;
     steps = [];
+    solvedWith = [];
     parseInput();
     for (i = 0; i < 9; i += 1) {
         for (j = 0; j < 9; j += 1) {
@@ -323,14 +496,17 @@ function solve() {
             }
         }
     }
+    steps[1] = cloneArray(steps[0]);
     while (changed) {
         changed = reducePossibleEntries();
         if (changed === false) {
             changed = onlyPossibleEntry();
         }
         if (changed === false) {
+            changed = reduceByUnion();
         }
     }
+    solvedWith.push("Solved?");
     deleteTableAndCreateNew();
 }
 function reset() {
@@ -357,7 +533,7 @@ function displayNextStep() {
     if (steps.length === 0) {
         return;
     }
-    currStep = Math.min(currStep + 1, steps.length - 1);
+    currStep = currStep + 1;
     deleteTableAndCreateNew();
 }
 function displayPreviousStep() {
@@ -365,7 +541,7 @@ function displayPreviousStep() {
     if (steps.length === 0) {
         return;
     }
-    currStep = Math.max(currStep - 1, 0);
+    currStep = currStep - 1;
     deleteTableAndCreateNew();
 }
 function displayLastStep() {
