@@ -316,7 +316,7 @@ function isSubSet(testSet, base) {
 }
 function unionInRow(row, setSize, arr) {
     "use strict";
-    var i, j, k, baseSet, currentSet, matches = [], changed = false, step = steps.length - 1;
+    var i, j, k, baseSet, currentSet, matches = [], changed = false, step = steps.length - 1, reducedToOneEntry = false;
     for (i = 0; i < 9; i += 1) {
         baseSet = arr[row][i];
         matches = [];
@@ -347,11 +347,12 @@ function unionInRow(row, setSize, arr) {
                 if (valueSet.storedSet.size === valueSet.setCount && !isSubSet(arr[row][k], valueSet.storedSet)) {
                     valueSet.storedSet.forEach(function (value) {
                         changed = arr[row][k].delete(value) || changed;
+                        reducedToOneEntry = arr[row][k].size === 1 || reducedToOneEntry;
                     });
                 }
             }
         });
-        if (changed) {
+        if (changed && reducedToOneEntry) {
             steps[step + 1] = steps[step];
             steps[step] = cloneArray(steps[step]);
             solvedWith[step] = "Union in row";
@@ -363,7 +364,7 @@ function unionInRow(row, setSize, arr) {
 }
 function unionInColumn(column, setSize, arr) {
     "use strict";
-    var i, j, k, baseSet, currentSet, matches = [], changed = false, step = steps.length - 1;
+    var i, j, k, baseSet, currentSet, matches = [], changed = false, step = steps.length - 1, reducedToOneEntry = false;
     for (i = 0; i < 9; i += 1) {
         baseSet = arr[i][column];
         matches = [];
@@ -394,11 +395,12 @@ function unionInColumn(column, setSize, arr) {
                 if (valueSet.storedSet.size === valueSet.setCount && !isSubSet(arr[k][column], valueSet.storedSet)) {
                     valueSet.storedSet.forEach(function (value) {
                         changed = arr[k][column].delete(value) || changed;
+                        reducedToOneEntry = arr[k][column].size === 1 || reducedToOneEntry;
                     });
                 }
             }
         });
-        if (changed) {
+        if (changed && reducedToOneEntry) {
             steps[step + 1] = steps[step];
             steps[step] = cloneArray(steps[step]);
             solvedWith[step] = "Union in column";
@@ -410,7 +412,7 @@ function unionInColumn(column, setSize, arr) {
 }
 function unionInCell(cell, setSize, arr) {
     "use strict";
-    var i, j, k, l, column, baseSet, currentSet, matches = [], changed = false, step = steps.length - 1, offsetRow = 3 * Math.floor(cell / 3), offsetCol = 3 * (cell % 3);
+    var i, j, k, l, column, baseSet, currentSet, matches = [], changed = false, step = steps.length - 1, offsetRow = 3 * Math.floor(cell / 3), offsetCol = 3 * (cell % 3), reducedToOneEntry;
     for (column = 0; column < 3; column += 1) {
         for (i = 0; i < 3; i += 1) {
             baseSet = arr[i + offsetRow][column + offsetCol];
@@ -443,11 +445,12 @@ function unionInCell(cell, setSize, arr) {
                         if (valueSet.storedSet.size === valueSet.setCount && !isSubSet(arr[k + offsetRow][l + offsetCol], valueSet.storedSet)) {
                             valueSet.storedSet.forEach(function (value) {
                                 changed = arr[k + offsetRow][l + offsetCol].delete(value) || changed;
+                                reducedToOneEntry = arr[k + offsetRow][l + offsetCol].size === 1 || reducedToOneEntry;
                             });
                         }
                 }
             });
-            if (changed) {
+            if (changed && reducedToOneEntry) {
                 steps[step + 1] = steps[step];
                 steps[step] = cloneArray(steps[step]);
                 solvedWith[step] = "Union in cell";
